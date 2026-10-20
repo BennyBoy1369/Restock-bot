@@ -1,0 +1,63 @@
+# ===================== Pokemon Restock Bot settings =====================
+
+home_zip: "48322"                # West Bloomfield
+home_latlon: [42.568, -83.383]
+radius_miles: 13                 # nothing farther than this gets texted
+check_every_minutes: 5
+
+# The 5 stores you care about. Costco and Sam's Club don't post in-store
+# stock online, so those come from community reports (Reddit) only.
+stores: ["Target", "Walmart", "Best Buy", "Costco", "Sam's Club"]
+
+# Words that make a product count (must also contain "pok")
+product_words: ["elite trainer", "etb", "booster", "bundle", "collection", "tin",
+                "blister", "build & battle", "build and battle", "premium", "upc",
+                "binder", "display", "trading card"]
+exclude_words: ["plush", "figure", "funko", "sleeves only", "costume", "lego",
+                "video game", "nintendo switch", "puzzle", "backpack", "shirt"]
+
+# ------------------------------------------------------------------ TEXTING
+texting:
+  method: console                # twilio | email | ntfy | console (testing)
+  to_number: "+1XXXXXXXXXX"      # your cell, for twilio
+  max_texts_per_hour: 6
+
+  twilio:                        # twilio.com - real SMS
+    account_sid: ""
+    auth_token: ""
+    from_number: "+1XXXXXXXXXX"
+
+  email:                         # free email-to-text (see README for your carrier)
+    gmail_address: ""
+    gmail_app_password: ""       # a Gmail "App password", not your normal password
+    to_address: "XXXXXXXXXX@tmomail.net"
+
+  ntfy:                          # free push alerts: install the "ntfy" app
+    topic: "ben-pokemon-restocks-CHANGE-ME-1234"   # make this hard to guess
+
+# ------------------------------------------------------------------ SOURCES
+bestbuy:
+  enabled: true
+  api_key: ""                    # free at developer.bestbuy.com
+  search_terms: ["pokemon trading card", "pokemon elite trainer box", "pokemon booster"]
+
+target:
+  enabled: true
+  # Public key target.com's own website uses. If Target checks stop working,
+  # this probably changed - see README "Fixing Target".
+  web_key: "9f36aeafbe60771e321a7cc95a78140772ab3e96"
+  search_terms: ["pokemon trading cards", "pokemon elite trainer box"]
+  tcins: []                      # optional: exact Target item numbers to always watch
+
+walmart:
+  enabled: true                  # best effort; Walmart often blocks bots
+  search_terms: ["pokemon elite trainer box", "pokemon booster bundle"]
+
+community:
+  enabled: true
+  stores: ["Costco", "Sam's Club", "Target", "Walmart", "Best Buy"]
+  max_age_hours: 12
+  subreddits: ["PokemonTCG", "pkmntcgcollections", "PokeInvesting", "Detroit", "Michigan", "oaklandcounty"]
+  search_towns: ["West Bloomfield", "Novi", "Southfield", "Troy", "Farmington Hills",
+                 "Bloomfield", "Waterford", "Pontiac", "Auburn Hills", "Wixom",
+                 "Commerce", "Birmingham", "Northville"]
