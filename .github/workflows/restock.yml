@@ -41,6 +41,9 @@ jobs:
           TEXTING_METHOD: ntfy
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           BESTBUY_API_KEY: ${{ secrets.BESTBUY_API_KEY }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
           WALMART_ENABLED: "false"   # Walmart blocks GitHub's computers
         run: |
           if [ "${{ inputs.test_alert }}" = "true" ]; then
