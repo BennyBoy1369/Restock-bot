@@ -17,7 +17,7 @@ from datetime import datetime
 import yaml
 
 import notify
-from community import Reddit
+from community import Reddit, Slickdeals
 from retailers import BestBuy, Target, Walmart
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +37,11 @@ def load_config(path):
         cfg["texting"]["ntfy"]["topic"] = env["NTFY_TOPIC"]
     if env.get("BESTBUY_API_KEY"):
         cfg["bestbuy"]["api_key"] = env["BESTBUY_API_KEY"]
+    rc = cfg["community"].setdefault("reddit", {})
+    for var, field in [("REDDIT_CLIENT_ID", "client_id"), ("REDDIT_CLIENT_SECRET", "client_secret"),
+                       ("REDDIT_USERNAME", "username")]:
+        if env.get(var):
+            rc[field] = env[var]
     if env.get("WALMART_ENABLED"):
         cfg["walmart"]["enabled"] = env["WALMART_ENABLED"].lower() == "true"
     return cfg
@@ -71,6 +76,7 @@ def build_sources(cfg):
     if "Walmart" in want:
         sources.append(Walmart(cfg))
     sources.append(Reddit(cfg))  # covers Costco, Sam's Club, in-store reports
+    sources.append(Slickdeals(cfg))  # online deals at all five stores
     return [s for s in sources if s.enabled()]
 
 
@@ -80,7 +86,7 @@ def format_text(items):
     for it in items[:5]:
         dist = "online" if it["miles"] == 0 else f"{it['miles']:.1f} mi"
         price = f" - {it['price']}" if it.get("price") else ""
-        tag = "REPORT: " if it.get("report") else ""
+        tag = "REPORT: " if it.get("report") and it["miles"] > 0 else ""
         lines.append(f"- {tag}{it['store']} ({dist}): {it['product'][:70]}{price}")
     if len(items) > 5:
         lines.append(f"+{len(items) - 5} more")
@@ -149,12 +155,28 @@ def selftest(cfg):
          "subreddit": "PokemonTCG", "created_utc": now, "permalink": "/r/x/c"},
         {"id": "d", "title": "Nothing at Target West Bloomfield today", "selftext": "pokemon",
          "subreddit": "PokemonTCG", "created_utc": now, "permalink": "/r/x/d"},
+        {"id": "e", "body": "Sams in Troy has a pallet of ETBs right now", "subreddit": "PokemonTCG",
+         "created_utc": now, "permalink": "/r/x/e"},
     ]
     r.posts = lambda: fake
     hits = r.check()
     ids = sorted(h["key"] for h in hits)
-    print(f"  community reports kept: {ids} (expected reddit:a, reddit:b)")
-    assert ids == ["reddit:a", "reddit:b"], ids
+    print(f"  community reports kept: {ids} (expected a, b, e)")
+    assert ids == ["reddit:a", "reddit:b", "reddit:e"], ids
+    sd = community.Slickdeals(cfg)
+    rss = b'''<rss><channel>
+      <item><title>Pokemon TCG Ascended Heroes Elite Trainer Box $49.99 at Walmart</title>
+        <link>https://slickdeals.net/f/1</link><guid>thread-1</guid><description>x</description></item>
+      <item><title>LEGO Minecraft set $52</title><link>https://slickdeals.net/f/2</link><guid>thread-2</guid></item>
+    </channel></rss>'''
+    class FakeResp:
+        content = rss
+        def raise_for_status(self): pass
+    sd.s.get = lambda *a, **k: FakeResp()
+    deals = sd.check()
+    print(f"  slickdeals kept: {[d['store'] for d in deals]} (expected Walmart only)")
+    assert len(deals) == 1 and "Walmart" in deals[0]["store"]
+    hits += deals
     hits.append({"source": "Target", "store": "Target Novi", "product": "Pokemon TCG Ascended Heroes Elite Trainer Box",
                  "price": "$59.99", "miles": 7.4, "url": "https://www.target.com/p/-/A-1", "key": "t"})
     print("\n" + format_text(hits))

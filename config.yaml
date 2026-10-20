@@ -58,6 +58,13 @@ community:
   stores: ["Costco", "Sam's Club", "Target", "Walmart", "Best Buy"]
   max_age_hours: 12
   subreddits: ["PokemonTCG", "pkmntcgcollections", "PokeInvesting", "Detroit", "Michigan", "oaklandcounty"]
+  reddit:                        # optional: an APPROVED Reddit app (see README)
+    client_id: ""                # on GitHub, use secrets instead of filling these in
+    client_secret: ""
+    username: ""
   search_towns: ["West Bloomfield", "Novi", "Southfield", "Troy", "Farmington Hills",
                  "Bloomfield", "Waterford", "Pontiac", "Auburn Hills", "Wixom",
                  "Commerce", "Birmingham", "Northville"]
+
+slickdeals:
+  enabled: true                  # official front-page feed: online deals at your 5 stores
