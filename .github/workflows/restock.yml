@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: state.json
-          key: restock-state-${{ github.run_id }}
+          key: restock-state-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: restock-state-
 
       - name: Check stores
@@ -54,4 +54,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: state.json
-          key: restock-state-${{ github.run_id }}
+          key: restock-state-${{ github.run_id }}-${{ github.run_attempt }}
